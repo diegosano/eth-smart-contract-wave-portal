@@ -1,0 +1,55 @@
+import { ethers } from 'hardhat';
+
+async function main() {
+  const currentTimestampInSeconds = Math.round(Date.now() / 1000);
+  const ONE_YEAR_IN_SECS = 365 * 24 * 60 * 60;
+  const unlockTime = currentTimestampInSeconds + ONE_YEAR_IN_SECS;
+
+  const lockedAmount = ethers.utils.parseEther('1');
+
+  const lockContractFactory = await ethers.getContractFactory('Lock');
+  const lockContact = await lockContractFactory.deploy(unlockTime, {
+    value: lockedAmount,
+  });
+
+  await lockContact.deployed();
+
+  console.log('Lock with 1 ETH deployed to:', lockContact.address);
+
+  const [owner, randomPerson] = await ethers.getSigners();
+  const waveContractFactory = await ethers.getContractFactory('WavePortal');
+  const waveContract = await waveContractFactory.deploy();
+
+  await waveContract.deployed();
+
+  console.log('Contract deployed to:', waveContract.address);
+  console.log('Contract deployed by:', owner.address);
+
+  let waveCount
+  let waveTxn
+  let waveHistory
+
+  waveCount = await waveContract.getTotalWaves();
+  waveHistory = await waveContract.getWaveHistory();
+
+  waveTxn = await waveContract.wave();
+
+  await waveTxn.wait();
+
+  waveCount = await waveContract.getTotalWaves();
+  waveHistory = await waveContract.getWaveHistory();
+
+  waveTxn = await waveContract.connect(randomPerson).wave();
+
+  await waveTxn.wait();
+
+  waveCount = await waveContract.getTotalWaves();
+  waveHistory = await waveContract.getWaveHistory();
+
+  console.log(waveHistory)
+}
+
+main().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});
