@@ -27,26 +27,17 @@ async function main() {
 
   let waveCount
   let waveTxn
-  let waveHistory
 
   waveCount = await waveContract.getTotalWaves();
-  waveHistory = await waveContract.getWaveHistory();
 
-  waveTxn = await waveContract.wave();
-
+  waveTxn = await waveContract.wave("First message");
   await waveTxn.wait();
 
-  waveCount = await waveContract.getTotalWaves();
-  waveHistory = await waveContract.getWaveHistory();
-
-  waveTxn = await waveContract.connect(randomPerson).wave();
-
+  waveTxn = await waveContract.connect(randomPerson).wave("Second message");
   await waveTxn.wait();
 
-  waveCount = await waveContract.getTotalWaves();
-  waveHistory = await waveContract.getWaveHistory();
-
-  console.log(waveHistory)
+  let allWaves = await waveContract.getAllWaves();
+  console.log(allWaves);
 }
 
 main().catch((error) => {
